@@ -5,29 +5,6 @@ import statsmodels.api as sm
 from utils.config import Config
 from dataloader.dataloader import DataLoader
 
-#oos_pred_l = []
-#f_true = []
-#lag_order_l = []
-#var_MAE_year = {
-#    "2008": [],
-#    "2009": []
-#    }
-#var_MSE_year = {
-#    "2008": [],
-#    "2009": []
-#    }
-#var_MAE_raw = []
-#var_MSE_raw = []
-#var_MDA_raw = []
-#ts_length = []
-#errors = []
-#adf_results = {
-#    'irrigation_amount': [],
-#    'soil_temp': [],
-#    'precip_daily': [],
-#    'ETo':[]
-#               }
-
 class MultiVAR():
     def __init__(self, model_config, df):
         self.fh = model_config.fh
@@ -105,33 +82,3 @@ class MultiVAR():
             true = single_ts["soil_moisture"].values[-self.fh:]
             result.append((oos_pred, true))
         return result
-
-        # calc MAE
-        assert len(oos_pred) == len(single_ts["soil_moisture"].values[-self.fh:])
-        mae = np.abs(oos_pred - single_ts["soil_moisture"].values[-self.fh:]).mean()
-        mse = ((oos_pred - single_ts["soil_moisture"].values[-self.fh:])**2).mean()
-        mda = (np.sign(oos_pred[1:] - oos_pred[:-1]) == np.sign(single_ts["soil_moisture"].values[-self.fh+1:] - single_ts["soil_moisture"][-self.fh:-1])).astype(int)
-        var_MAE_year[year].append(mae)
-        var_MSE_year[year].append(mse)
-        var_MAE_raw.append(mae)
-        var_MSE_raw.append(mse)
-        var_MDA_raw.append(mda)
-        f_true.append((id, year, single_ts["soil_moisture"].values[-self.fh:]))
-
-        # plot results
-        if counter / 10 == 1.:
-            counter = 0
-            print(f"VAR_MAE: {mae}")
-            print(f"original length of ts: {len(single_ts)}")
-            print(f"length of ts minus 1st row for fh={self.fh} and lag={lag_order}: {data.shape[0]}")
-            print(f"len of fitted values, first {lag_order} rows are dropped to include lag: {var_fit.fittedvalues.shape[0]}")
-            plt.plot(y_pred, label="y_hat")
-            plt.plot(single_ts["soil_moisture"].values[1+lag_order:], label="y_true")
-            plt.plot(range(len(single_ts["soil_moisture"].values[1+lag_order:]) - (self.fh-1), # +1 for zero-indexing
-                            len(single_ts["soil_moisture"].values[1+lag_order:])+1),
-                        oos_pred,
-                        label="OOS_y_hat")
-        #var_fit.plot_forecast(10)
-            plt.legend()
-            plt.show()
-        counter += 1
